@@ -11,6 +11,26 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func createRequestMessage(methodName string, params []interface{}) []byte {
+	request := struct {
+		JSONRPC string        `json:"jsonrpc"`
+		Method  string        `json:"method"`
+		Params  []interface{} `json:"params"`
+		ID      int           `json:"id"`
+	}{
+		JSONRPC: "2.0",
+		Method:  methodName,
+		Params:  params,
+		ID:      1,
+	}
+
+	requestMessage, err := json.Marshal(request)
+	if err != nil {
+		fmt.Println("Error marshalling request message:", err)
+	}
+
+	return requestMessage
+}
 func main() {
 
 	err := godotenv.Load()
@@ -24,56 +44,14 @@ func main() {
 	// url := baseUrl + apiKey
 	url := "https://api.mainnet-beta.solana.com"
 
-	// health_request := struct {
-	// 	JSONRPC string        `json:"jsonrpc"`
-	// 	Method  string        `json:"method"`
-	// 	Params  []interface{} `json:"params"`
-	// 	ID      int           `json:"id"`
-	// }{
-	// 	JSONRPC: "2.0",
-	// 	Method:  "getHealth",
-	// 	ID:      1,
-	// }
+	// Get Epoch Info
 
-	getEpochInfoRequest := struct {
-		JSONRPC string        `json:"jsonrpc"`
-		Method  string        `json:"method"`
-		Params  []interface{} `json:"params"`
-		ID      int           `json:"id"`
-	}{
-		JSONRPC: "2.0",
-		Method:  "getEpochInfo",
-		ID:      1,
-	}
+	requestMessage := createRequestMessage("getEpochInfo", []interface{}{})
 
-	getEpochInfoRequestMessage, err := json.Marshal(getEpochInfoRequest)
-	if err != nil {
-		log.Fatal(err)
-	}
+	response, err := http.Post(url, "application/json", bytes.NewBuffer(requestMessage))
 
-	getEpochInfoRequestResponse, err := http.Post(url, "application/json", bytes.NewBuffer(getEpochInfoRequestMessage))
-	if err != nil {
-		log.Fatal(err)
-	}
-	getEpochInfoRequestResponseBytes, err := ioutil.ReadAll(getEpochInfoRequestResponse.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("getEpochInfoRequestResponseBytes:", string(getEpochInfoRequestResponseBytes))
+	responseBytes, err := ioutil.ReadAll(response.Body)
 
-	// type HealthResponse struct {
-	// 	Jsonrpc string `json:"jsonrpc"`
-	// 	Error   struct {
-	// 		Code    int    `json:"code"`
-	// 		Message string `json:"message"`
-	// 		Data    struct {
-	// 		} `json:"data"`
-	// 	} `json:"error"`
-	// 	ID int `json:"id"`
-	// }
-
-	// var healthResponse HealthResponse
-
-	// Decode the JSON-RPC response message into a Go struct
+	fmt.Println("getEpochInfoRequestResponseBytes:", string(responseBytes))
 
 }
