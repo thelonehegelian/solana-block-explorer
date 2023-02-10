@@ -5,62 +5,75 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	url := ""
 
-	// Define the JSON-RPC request as a Go struct
-	request := struct {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// baseUrl := "wss://solana-mainnet.g.alchemy.com/v2/"
+	// baseUrl := "https://solana-mainnet.g.alchemy.com/v2/"
+	// apiKey := os.Getenv("ALCHEMY_SOLANA_API_KEY")
+	// url := baseUrl + apiKey
+	url := "https://api.mainnet-beta.solana.com"
+
+	// health_request := struct {
+	// 	JSONRPC string        `json:"jsonrpc"`
+	// 	Method  string        `json:"method"`
+	// 	Params  []interface{} `json:"params"`
+	// 	ID      int           `json:"id"`
+	// }{
+	// 	JSONRPC: "2.0",
+	// 	Method:  "getHealth",
+	// 	ID:      1,
+	// }
+
+	getEpochInfoRequest := struct {
 		JSONRPC string        `json:"jsonrpc"`
 		Method  string        `json:"method"`
 		Params  []interface{} `json:"params"`
 		ID      int           `json:"id"`
 	}{
 		JSONRPC: "2.0",
-		Method:  "Filecoin.ChainHead",
-		Params:  []interface{}{},
+		Method:  "getEpochInfo",
 		ID:      1,
 	}
 
-	// Marshal the Go struct into a JSON-RPC request message
-	requestMessage, err := json.Marshal(request)
+	getEpochInfoRequestMessage, err := json.Marshal(getEpochInfoRequest)
 	if err != nil {
-		fmt.Println("Error marshaling JSON-RPC request:", err)
-		return
+		log.Fatal(err)
 	}
 
-	// Send the HTTP POST request with the JSON-RPC request message
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestMessage))
+	getEpochInfoRequestResponse, err := http.Post(url, "application/json", bytes.NewBuffer(getEpochInfoRequestMessage))
 	if err != nil {
-		fmt.Println("Error sending HTTP request:", err)
-		return
+		log.Fatal(err)
 	}
-
-	// Read the HTTP response body
-	defer resp.Body.Close()
-	responseMessage, err := ioutil.ReadAll(resp.Body)
+	getEpochInfoRequestResponseBytes, err := ioutil.ReadAll(getEpochInfoRequestResponse.Body)
 	if err != nil {
-		fmt.Println("Error reading HTTP response:", err)
-		return
+		log.Fatal(err)
 	}
-	type ChainHeadResult struct {
-		Cids []map[string]string `json:"Cids"`
-	}
+	fmt.Println("getEpochInfoRequestResponseBytes:", string(getEpochInfoRequestResponseBytes))
 
-	// Unmarshal the JSON-RPC response message into a Go struct
-	var response ChainHeadResult
+	// type HealthResponse struct {
+	// 	Jsonrpc string `json:"jsonrpc"`
+	// 	Error   struct {
+	// 		Code    int    `json:"code"`
+	// 		Message string `json:"message"`
+	// 		Data    struct {
+	// 		} `json:"data"`
+	// 	} `json:"error"`
+	// 	ID int `json:"id"`
+	// }
 
-	// print the response	message
-	fmt.Println("JSON-RPC response:", string(responseMessage))
+	// var healthResponse HealthResponse
 
-	err = json.Unmarshal([]byte(responseMessage), &response)
-	if err != nil {
-		fmt.Println("Error unmarshaling JSON-RPC response:", err)
-		return
-	}
+	// Decode the JSON-RPC response message into a Go struct
 
-	// Log the response
-	fmt.Println("JSON-RPC response:", response)
 }
