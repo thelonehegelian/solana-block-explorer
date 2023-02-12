@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -40,6 +41,23 @@ func main() {
 	fmt.Println("blockNumber", "|", "blockHeight", "|", "blockTime", "|", "blockHash", "|", "prevBlockHash", "|", "txCount")
 	fmt.Println("------------------------------------------------------------------------------------------------------------------")
 
+	// Open a new file for writing
+	file, err := os.Create("transactions.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	// Create a new CSV writer
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write the header row
+	err = writer.Write([]string{"blockNumber", "blockHeight", "blockTime", "blockHash", "prevBlockHash", "txCount"})
+	if err != nil {
+		panic(err)
+	}
+
 	// loop through all the blocks in the epoch
 	// @todo write to CSV
 	// @todo refactor
@@ -55,26 +73,21 @@ func main() {
 			blockHeight, _ := json.Marshal(block.Result.BlockHeight)
 			blockHash, _ := json.Marshal(block.Result.Blockhash)
 			prevBlockHash, _ := json.Marshal(block.Result.PreviousBlockhash)
-
-			// get transaction data from the blockchain here
-			txCount, _ := json.Marshal(len(block.Result.Transactions))
 			tx := block.Result.Transactions
-			// txLen := len(tx)
+			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), len(tx))
+			// get the transaction details for each transaction in the block
 			if len(tx) > 0 {
 				for i := 0; i < len(tx); i++ {
 					txSig := tx[i].Transaction.Signatures[0]
-
-					fmt.Println(txSig)
-					time.Sleep(5 * time.Second)
-					rpcMethods.GetTransactionBySignature(txSig, url)
-
-					// // id := transaction.Result.ID
-					// blockTime, _ := json.Marshal(transaction.BlockTime)
-					// fmt.Println(string(blockTime))
-
+					time.Sleep(1 * time.Second)
+					txDetails, _ := rpcMethods.GetTransactionBySignature(txSig, url)
+					txId := strconv.FormatInt(int64(txDetails.ID), 10)
+					txFee := strconv.FormatInt(int64(txDetails.Result.Meta.Fee), 10)
+					recentBlockHash := txDetails.Result.Transaction.Message.RecentBlockhash
+					fmt.Println(txId, "|", txFee, "|", recentBlockHash)
 				}
 			}
-			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), string(txCount))
+
 			blockCount += 1
 		}
 		if blockCount > end_block {
