@@ -38,10 +38,10 @@ func main() {
 	blockCount := 1
 	end_block := 4
 
+	// @todo Header to the blocks.csv file
 	fmt.Println("blockNumber", "|", "blockHeight", "|", "blockTime", "|", "blockHash", "|", "prevBlockHash", "|", "txCount")
 	fmt.Println("------------------------------------------------------------------------------------------------------------------")
 
-	// Open a new file for writing
 	file, err := os.Create("transactions.csv")
 	if err != nil {
 		panic(err)
@@ -74,10 +74,13 @@ func main() {
 			blockHash, _ := json.Marshal(block.Result.Blockhash)
 			prevBlockHash, _ := json.Marshal(block.Result.PreviousBlockhash)
 			tx := block.Result.Transactions
+			// @todo write to blocks.csv
 			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), len(tx))
-			// get the transaction details for each transaction in the block
+			/**
+			* get the transaction details for each transaction in the block and write to CSV
+			 */
 			if len(tx) > 0 {
-				// @todo i < len(tx)
+				// @todo i < len(tx) testing with 2 transactions
 				for i := 0; i < 2; i++ {
 					txSig := tx[i].Transaction.Signatures[0]
 					time.Sleep(1 * time.Second) // to avoid overloading the node
