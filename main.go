@@ -36,7 +36,7 @@ func main() {
 	start_block := 176688000
 	// end_block := 176689000
 	blockCount := 1
-	end_block := 1000
+	end_block := 4
 
 	fmt.Println("blockNumber", "|", "blockHeight", "|", "blockTime", "|", "blockHash", "|", "prevBlockHash", "|", "txCount")
 	fmt.Println("------------------------------------------------------------------------------------------------------------------")
@@ -77,14 +77,22 @@ func main() {
 			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), len(tx))
 			// get the transaction details for each transaction in the block
 			if len(tx) > 0 {
-				for i := 0; i < len(tx); i++ {
+				for i := 0; i < 2; i++ {
 					txSig := tx[i].Transaction.Signatures[0]
 					time.Sleep(1 * time.Second)
 					txDetails, _ := rpcMethods.GetTransactionBySignature(txSig, url)
-					txId := strconv.FormatInt(int64(txDetails.ID), 10)
 					txFee := strconv.FormatInt(int64(txDetails.Result.Meta.Fee), 10)
 					recentBlockHash := txDetails.Result.Transaction.Message.RecentBlockhash
-					fmt.Println(txId, "|", txFee, "|", recentBlockHash)
+					timestamp := txDetails.BlockTime
+					txError := txDetails.Result.Meta.Err
+
+					// write row
+					row := []string{txSig, string(blockHash), txFee, recentBlockHash}
+					err = writer.Write(row)
+					if err != nil {
+						panic(err)
+					}
+
 				}
 			}
 
