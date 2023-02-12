@@ -3,11 +3,11 @@ package types
 type Block struct {
 	Jsonrpc string `json:"jsonrpc"`
 	Result  struct {
-		BlockHeight       int         `json:"blockHeight"`
-		BlockTime         interface{} `json:"blockTime"`
-		Blockhash         string      `json:"blockhash"`
-		ParentSlot        int         `json:"parentSlot"`
-		PreviousBlockhash string      `json:"previousBlockhash"`
+		BlockHeight       uint64 `json:"blockHeight"`
+		BlockTime         int64  `json:"blockTime"`
+		Blockhash         string `json:"blockhash"`
+		ParentSlot        uint64 `json:"parentSlot"`
+		PreviousBlockhash string `json:"previousBlockhash"`
 		Transactions      []struct {
 			Meta struct {
 				Err               interface{}   `json:"err"`
@@ -63,7 +63,7 @@ type Transaction struct {
 	Result  struct {
 		Meta struct {
 			Err               interface{}   `json:"err"`
-			Fee               int           `json:"fee"`
+			Fee               uint64        `json:"fee"`
 			InnerInstructions []interface{} `json:"innerInstructions"`
 			PostBalances      []interface{} `json:"postBalances"`
 			PostTokenBalances []interface{} `json:"postTokenBalances"`
@@ -74,7 +74,7 @@ type Transaction struct {
 				Ok interface{} `json:"Ok"`
 			} `json:"status"`
 		} `json:"meta"`
-		Slot        int `json:"slot"`
+		Slot        uint64 `json:"slot"`
 		Transaction struct {
 			Message struct {
 				AccountKeys []string `json:"accountKeys"`
@@ -93,6 +93,6 @@ type Transaction struct {
 			Signatures []string `json:"signatures"`
 		} `json:"transaction"`
 	} `json:"result"`
-	BlockTime interface{} `json:"blockTime"`
-	ID        int         `json:"id"`
+	BlockTime int64 `json:"blockTime"`
+	ID        int   `json:"id"`
 }
