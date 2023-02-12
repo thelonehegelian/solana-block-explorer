@@ -1,3 +1,5 @@
+// @todo handle errors properly
+
 package rpcMethods
 
 import (
@@ -79,4 +81,24 @@ func GetCurrentEpoch(nodeApi string) (types.CurrentEpoch, error) {
 	}
 
 	return currentEpochResponse, err
+}
+
+func GetTransactionBySignature(signature string, nodeApi string) (types.Transaction, error) {
+	var transactionResponse types.Transaction
+
+	methodName := "getTransaction"
+	params := []interface{}{signature, map[string]interface{}{
+		"encoding": "json",
+	}}
+
+	requestMessage := createRequestMessage(methodName, params)
+	response, err := http.Post(nodeApi, "application/json", bytes.NewBuffer(requestMessage))
+	fmt.Println("Response status:", response.Status)
+
+	// responseBytes, err := ioutil.ReadAll(response.Body)
+	// err = json.Unmarshal(responseBytes, &transactionResponse)
+	// if err != nil {
+	// 	fmt.Println("Error unmarshalling transaction response:", err)
+	// }
+	return transactionResponse, err
 }

@@ -25,7 +25,7 @@ func main() {
 	baseUrl := "https://solana-mainnet.g.alchemy.com/v2/"
 	apiKey := os.Getenv("ALCHEMY_SOLANA_API_KEY")
 	url := baseUrl + apiKey
-	// url := "https://api.mainnet-beta.solana.com"
+	// url := "https://api.mainnet-beta.solana.com" // there is a rate limit for this so doesn't work after some requests
 
 	// blockData, err := rpcMethods.GetBlock(1, url)
 	// data, _ := json.MarshalIndent(blockData, "", " ")
@@ -55,8 +55,25 @@ func main() {
 			blockHeight, _ := json.Marshal(block.Result.BlockHeight)
 			blockHash, _ := json.Marshal(block.Result.Blockhash)
 			prevBlockHash, _ := json.Marshal(block.Result.PreviousBlockhash)
-			txCount, _ := json.Marshal(len(block.Result.Transactions))
 
+			// get transaction data from the blockchain here
+			txCount, _ := json.Marshal(len(block.Result.Transactions))
+			tx := block.Result.Transactions
+			// txLen := len(tx)
+			if len(tx) > 0 {
+				for i := 0; i < len(tx); i++ {
+					txSig := tx[i].Transaction.Signatures[0]
+
+					fmt.Println(txSig)
+					time.Sleep(5 * time.Second)
+					rpcMethods.GetTransactionBySignature(txSig, url)
+
+					// // id := transaction.Result.ID
+					// blockTime, _ := json.Marshal(transaction.BlockTime)
+					// fmt.Println(string(blockTime))
+
+				}
+			}
 			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), string(txCount))
 			blockCount += 1
 		}
