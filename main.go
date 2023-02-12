@@ -62,7 +62,7 @@ func main() {
 	// @todo write to CSV
 	// @todo refactor
 	for {
-		// sleep for 1 second
+		// sleep for 1 second to avoid overloading the node
 		time.Sleep(1 * time.Second)
 		block, _ := rpcMethods.GetBlock(start_block, url)
 		blockTime, _ := json.Marshal(block.Result.BlockTime)
