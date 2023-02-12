@@ -31,18 +31,22 @@ func main() {
 	// data, _ := json.MarshalIndent(blockData, "", " ")
 	// print(string(data))
 
-	// Epoch 409
+	// Epoch 409, first
 	start_block := 176688000
-	end_block := 176689000
+	// end_block := 176689000
+	blockCount := 1
+	end_block := 1000
 
 	fmt.Println("blockNumber", "|", "blockHeight", "|", "blockTime", "|", "blockHash", "|", "prevBlockHash", "|", "txCount")
 	fmt.Println("------------------------------------------------------------------------------------------------------------------")
 
 	// loop through all the blocks in the epoch
-	for i := start_block; i <= end_block; i++ {
+	// @todo write to CSV
+	// @todo refactor
+	for {
 		// sleep for 1 second
 		time.Sleep(1 * time.Second)
-		block, _ := rpcMethods.GetBlock(i, url)
+		block, _ := rpcMethods.GetBlock(start_block, url)
 		blockTime, _ := json.Marshal(block.Result.BlockTime)
 		blockTimeInt, _ := strconv.ParseInt(string(blockTime), 10, 64)
 
@@ -53,8 +57,12 @@ func main() {
 			prevBlockHash, _ := json.Marshal(block.Result.PreviousBlockhash)
 			txCount, _ := json.Marshal(len(block.Result.Transactions))
 
-			fmt.Println(i, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), string(txCount))
+			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), string(txCount))
+			blockCount += 1
 		}
-
+		if blockCount > end_block {
+			break
+		}
+		start_block += 1
 	}
 }
