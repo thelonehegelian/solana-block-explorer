@@ -8,6 +8,14 @@ Initial Plan:
 4. Find unique addresses?
 5. 
 
+Notes:
+
+- First block in an Epoch does not have transactions
+
+Block Table
+---
+BlockHeight/Number | MinedTimeStamp | BlockHash | PreviousBlockhash | TransactionCount | Epoch(?) | BlockMiner/Validator(?)
+
 
 Database Structure: 
 --- 
