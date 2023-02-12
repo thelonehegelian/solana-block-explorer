@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"solana_data/rpcMethods"
 
@@ -21,7 +21,12 @@ func main() {
 	// url := baseUrl + apiKey
 	url := "https://api.mainnet-beta.solana.com"
 
-	blockData, err := rpcMethods.GetBlock(1, url)
-	fmt.Println("blockData:", blockData.Result.Transactions)
+	// blockData, err := rpcMethods.GetBlock(1, url)
+	// data, _ := json.MarshalIndent(blockData, "", " ")
+	// print(string(data))
+
+	epochData, err := rpcMethods.GetCurrentEpoch(url)
+	data, _ := json.MarshalIndent(epochData, "", " ")
+	print(string(data))
 
 }

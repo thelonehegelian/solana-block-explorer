@@ -44,3 +44,16 @@ type Block struct {
 	} `json:"result"`
 	ID int `json:"id"`
 }
+
+type CurrentEpoch struct {
+	Jsonrpc string `json:"jsonrpc"`
+	Result  struct {
+		AbsoluteSlot     int `json:"absoluteSlot"`
+		BlockHeight      int `json:"blockHeight"`
+		Epoch            int `json:"epoch"`
+		SlotIndex        int `json:"slotIndex"`
+		SlotsInEpoch     int `json:"slotsInEpoch"`
+		TransactionCount int `json:"transactionCount"`
+	} `json:"result"`
+	ID int `json:"id"`
+}

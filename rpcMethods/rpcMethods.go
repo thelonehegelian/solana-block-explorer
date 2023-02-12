@@ -9,6 +9,7 @@ import (
 	"solana_data/types"
 )
 
+// creates the request message to send to the RPC endpoint in json format
 func createRequestMessage(methodName string, params []interface{}) []byte {
 	request := struct {
 		JSONRPC string        `json:"jsonrpc"`
@@ -30,7 +31,8 @@ func createRequestMessage(methodName string, params []interface{}) []byte {
 	return requestMessage
 }
 
-func GetBlock(blockNumber int, url string) (types.Block, error) {
+// returns the block data for the given block number
+func GetBlock(blockNumber int, nodeApi string) (types.Block, error) {
 	var blockResponse types.Block
 
 	methodName := "getBlock"
@@ -42,7 +44,7 @@ func GetBlock(blockNumber int, url string) (types.Block, error) {
 	}}
 
 	requestMessage := createRequestMessage(methodName, params)
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(requestMessage))
+	response, err := http.Post(nodeApi, "application/json", bytes.NewBuffer(requestMessage))
 	responseBytes, err := ioutil.ReadAll(response.Body)
 
 	// read into blockResponse
@@ -52,4 +54,29 @@ func GetBlock(blockNumber int, url string) (types.Block, error) {
 	}
 
 	return blockResponse, err
+}
+
+// returns the current epoch data
+func GetCurrentEpoch(nodeApi string) (types.CurrentEpoch, error) {
+	var currentEpochResponse types.CurrentEpoch
+
+	methodName := "getEpochInfo"
+	params := []interface{}{}
+
+	requestMessage := createRequestMessage(methodName, params)
+
+	response, err := http.Post(nodeApi, "application/json", bytes.NewBuffer(requestMessage))
+	// @todo see how to return errors
+	if response.StatusCode != 200 {
+		return currentEpochResponse, fmt.Errorf("Error getting current epoch: %v", response.StatusCode)
+	}
+
+	responseBytes, err := ioutil.ReadAll(response.Body)
+
+	err = json.Unmarshal(responseBytes, &currentEpochResponse)
+	if err != nil {
+		fmt.Println("Error unmarshalling current epoch response:", err)
+	}
+
+	return currentEpochResponse, err
 }
