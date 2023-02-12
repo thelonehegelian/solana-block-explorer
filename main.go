@@ -53,7 +53,7 @@ func main() {
 	defer writer.Flush()
 
 	// Write the header row
-	err = writer.Write([]string{"blockNumber", "blockHeight", "blockTime", "blockHash", "prevBlockHash", "txCount"})
+	err = writer.Write([]string{"Timestamp", "Transaction Signature", "Transaction Slot", "Block Hash", "Recent Hash"})
 	if err != nil {
 		panic(err)
 	}
@@ -77,17 +77,20 @@ func main() {
 			fmt.Println(start_block, string(blockHeight), string(blockTime), string(blockHash), string(prevBlockHash), len(tx))
 			// get the transaction details for each transaction in the block
 			if len(tx) > 0 {
+				// @todo i < len(tx)
 				for i := 0; i < 2; i++ {
 					txSig := tx[i].Transaction.Signatures[0]
-					time.Sleep(1 * time.Second)
+					time.Sleep(1 * time.Second) // to avoid overloading the node
 					txDetails, _ := rpcMethods.GetTransactionBySignature(txSig, url)
+					txSlot := txDetails.Result.Slot
 					txFee := strconv.FormatInt(int64(txDetails.Result.Meta.Fee), 10)
 					recentBlockHash := txDetails.Result.Transaction.Message.RecentBlockhash
-					timestamp := txDetails.BlockTime
-					txError := txDetails.Result.Meta.Err
+					// @todo add the two below to the CSV
+					// timestamp := txDetails.BlockTime
+					// txError := txDetails.Result.Meta.Err
 
-					// write row
-					row := []string{txSig, string(blockHash), txFee, recentBlockHash}
+					// write row to CSV
+					row := []string{txSig, strconv.FormatInt(int64(txSlot), 10), string(blockHash), txFee, recentBlockHash}
 					err = writer.Write(row)
 					if err != nil {
 						panic(err)
