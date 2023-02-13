@@ -1,1 +1,4 @@
 .env
+transactions.csv
+blocks.csv
+
