@@ -60,9 +60,10 @@ func main() {
 
 	transactions := [][]string{}
 	blocks := [][]string{}
-	// Header of transactions.csv
+	// header of blocks and transactions csv
+	blocks = append(blocks, []string{"blockNumber", "blockHeight", "blockTime", "blockHash", "prevBlockHash", "txCount"})
 	transactions = append(transactions,
-		[]string{"Timestamp", "Transaction Signature", "Transaction Slot", "Block Hash", "Recent Hash", "txFee"},
+		[]string{"timestamp", "txSignature", "transactionSlot", "blockHash", "recentHash", "txFee"},
 	)
 
 	// loop through all the blocks in the epoch
