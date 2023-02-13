@@ -1,42 +1,12 @@
 package main
 
 import (
-	"encoding/csv"
-	"fmt"
 	"log"
 	"os"
 	"solana_data/dataCollectors"
 
 	"github.com/joho/godotenv"
 )
-
-func toCSV(filename string, data [][]string) {
-	file, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	for _, row := range data {
-		err = writer.Write(row)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-func toString(d interface{}) string {
-	return fmt.Sprintf("%v", d)
-}
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
 
 func main() {
 
