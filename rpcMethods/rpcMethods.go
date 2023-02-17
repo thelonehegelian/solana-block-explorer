@@ -11,18 +11,32 @@ import (
 	"solana_data/types"
 )
 
+type SolRequest struct {
+	JSONRPC string        `json:"jsonrpc"`
+	ID      uint64        `json:"id"`
+	Method  string        `json:"method"`
+	Params  []interface{} `json:"params"`
+}
+
+type SolGetBlockConfig struct {
+	Encoding                       string `json:"encoding"`
+	MaxSupportedTransactionVersion int    `json:"maxSupportedTransactionVersion"`
+	TransactionDetails             string `json:"transactionDetails"`
+	Rewards                        bool   `json:"rewards"`
+}
+
+type SolGetBlockParams struct {
+	SlotNumber uint64
+	Object     SolGetBlockConfig
+}
+
 // creates the request message to send to the RPC endpoint in json format
-func createRequestMessage(methodName string, params []interface{}) []byte {
-	request := struct {
-		JSONRPC string        `json:"jsonrpc"`
-		Method  string        `json:"method"`
-		Params  []interface{} `json:"params"`
-		ID      int           `json:"id"`
-	}{
+func createRequestMessage(method string, params []interface{}) []byte {
+	request := SolRequest{
 		JSONRPC: "2.0",
-		Method:  methodName,
-		Params:  params,
 		ID:      1,
+		Method:  method,
+		Params:  params,
 	}
 
 	requestMessage, err := json.Marshal(request)
@@ -34,22 +48,30 @@ func createRequestMessage(methodName string, params []interface{}) []byte {
 }
 
 // returns the block data for the given block number
-func GetBlock(blockNumber int, nodeApi string) (types.Block, error) {
-	var blockResponse types.Block
+func GetBlock(blockNumber int, nodeApi string) (*types.Block, error) {
+	getBlockParams := SolGetBlockParams{
+		SlotNumber: uint64(blockNumber),
+		Object: SolGetBlockConfig{
+			Encoding:                       "json",
+			MaxSupportedTransactionVersion: 0,
+			TransactionDetails:             "full",
+			Rewards:                        false,
+		},
+	}
+	params := []interface{}{getBlockParams.SlotNumber, getBlockParams.Object}
 
-	methodName := "getBlock"
-	params := []interface{}{blockNumber, map[string]interface{}{
-		"encoding":                       "json",
-		"maxSupportedTransactionVersion": 0,
-		"transactionDetails":             "full",
-		"rewards":                        false,
-	}}
-
-	requestMessage := createRequestMessage(methodName, params)
+	requestMessage := createRequestMessage("getBlock", params)
 	response, err := http.Post(nodeApi, "application/json", bytes.NewBuffer(requestMessage))
+	if err != nil {
+		return nil, err
+	}
 	responseBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
 
 	// read into blockResponse
+	var blockResponse *types.Block
 	err = json.Unmarshal(responseBytes, &blockResponse)
 	if err != nil {
 		fmt.Println("Error unmarshalling block response:", err)
