@@ -1,6 +1,7 @@
 package dataCollectors
 
 import (
+	"encoding/json"
 	"fmt"
 	"solana_data/helpers"
 	"solana_data/rpcMethods"
@@ -34,7 +35,7 @@ func CollectTransactionsToCSV(startSlot int, endSlot int, nodeApi string) {
 			continue
 		}
 
-		blockHash := block.Result.Blockhash
+		// blockHash := block.Result.Blockhash
 		tx := block.Result.Transactions
 		// get the transaction details for each transaction in the block and write to CSV
 		if len(tx) > 0 {
@@ -43,13 +44,15 @@ func CollectTransactionsToCSV(startSlot int, endSlot int, nodeApi string) {
 				txSig := tx[i].Transaction.Signatures[0]
 				// fmt.Println("txSig: ", txSig)
 				txDetails, _ := rpcMethods.GetTransactionBySignature(txSig, nodeApi)
-				row := transactionAsCsvRow(txSig, blockHash, &txDetails)
-				transactions = append(transactions, row)
+				bts, _ := json.MarshalIndent(txDetails, "", "  ")
+				fmt.Println(string(bts))
+				// row := transactionAsCsvRow(txSig, blockHash, &txDetails)
+				// transactions = append(transactions, row)
 				time.Sleep(100 * time.Millisecond) // to avoid overloading the node
 			}
 		}
 		// sleep for 0.1 second to avoid overloading the node
 		time.Sleep(100 * time.Millisecond)
 	}
-	helpers.ToCSV("transactions.csv", transactions)
+	// helpers.ToCSV("transactions.csv", transactions)
 }

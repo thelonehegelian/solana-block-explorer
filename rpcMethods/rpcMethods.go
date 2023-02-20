@@ -105,8 +105,9 @@ func GetCurrentEpoch(nodeApi string) (types.CurrentEpoch, error) {
 	return currentEpochResponse, err
 }
 
-func GetTransactionBySignature(signature string, nodeApi string) (types.Transaction, error) {
-	var transactionResponse types.Transaction
+func GetTransactionBySignature(signature string, nodeApi string) (map[string]interface{}, error) {
+	// var transactionResponse types.Transaction
+	var transactionResponse map[string]interface{}
 
 	methodName := "getTransaction"
 	params := []interface{}{signature, map[string]interface{}{
