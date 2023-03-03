@@ -48,7 +48,7 @@ func CollectTransactionsToCSV(startSlot int, endSlot int, nodeApi string) {
 				fmt.Println(string(bts))
 				// row := transactionAsCsvRow(txSig, blockHash, &txDetails)
 				// transactions = append(transactions, row)
-				time.Sleep(100 * time.Millisecond) // to avoid overloading the node
+				time.Sleep(1000 * time.Millisecond) // to avoid overloading the node
 			}
 		}
 		// sleep for 0.1 second to avoid overloading the node
