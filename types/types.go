@@ -75,6 +75,7 @@ type Transaction struct {
 			} `json:"status"`
 		} `json:"meta"`
 		Slot        uint64 `json:"slot"`
+		BlockTime   int64  `json:"blockTime"`
 		Transaction struct {
 			Message struct {
 				AccountKeys []string `json:"accountKeys"`
@@ -93,6 +94,5 @@ type Transaction struct {
 			Signatures []string `json:"signatures"`
 		} `json:"transaction"`
 	} `json:"result"`
-	BlockTime int64 `json:"blockTime"`
-	ID        int   `json:"id"`
+	ID int `json:"id"`
 }

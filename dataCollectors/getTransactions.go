@@ -9,23 +9,56 @@ import (
 	"time"
 )
 
-func transactionAsCsvRow(txSignature, blockHash string, tx *types.Transaction) []string {
+var TRANSACTIONS_HEADER = []string{
+	"block_BlockHeight",
+	"block_BlockTime",
+	"block_Blockhash",
+	"block_ParentSlot",
+	"block_PreviousBlockhash",
+	"block_lenTransactions",
+
+	"tx_Signature",
+	"tx_Slot",
+	"tx_BlockTime",
+	"tx_Fee",
+	"tx_Status",
+	"tx_Err",
+	"tx_RecentBlockhash",
+	"tx_NumRequiredSignatures",
+	"tx_lenSignatures",
+	"tx_AccountKey0",
+	"tx_AccountKey1",
+	"tx_AccountKeys",
+}
+
+func transactionAsCsvRow(block *types.Block, txSignature string, tx *types.Transaction) []string {
 	return []string{
-		txSignature,
-		blockHash,
-		helpers.ToString(tx.BlockTime),
+		helpers.ToString(block.Result.BlockHeight),
+		helpers.ToString(block.Result.BlockTime),
+		helpers.ToString(block.Result.Blockhash),
+		helpers.ToString(block.Result.ParentSlot),
+		helpers.ToString(block.Result.PreviousBlockhash),
+		helpers.ToString(len(block.Result.Transactions)),
+
+		helpers.ToString(txSignature),
 		helpers.ToString(tx.Result.Slot),
-		tx.Result.Transaction.Message.RecentBlockhash,
+		helpers.ToString(tx.Result.BlockTime),
 		helpers.ToString(tx.Result.Meta.Fee),
+		helpers.ToString(tx.Result.Meta.Status.Ok),
+		helpers.ToString(tx.Result.Meta.Err),
+		helpers.ToString(tx.Result.Transaction.Message.RecentBlockhash),
+		helpers.ToString(tx.Result.Transaction.Message.Header.NumRequiredSignatures),
+		helpers.ToString(len(tx.Result.Transaction.Signatures)),
+		helpers.ToString(tx.Result.Transaction.Message.AccountKeys[0]),
+		helpers.ToString(tx.Result.Transaction.Message.AccountKeys[1]),
+		helpers.ToString(tx.Result.Transaction.Message.AccountKeys[2:]),
 	}
 }
 
-// @todo refactor
-// @todo return error if there is one
 func CollectTransactionsToCSV(startSlot int, endSlot int, nodeApi string) {
-	transactions := [][]string{}
-	// add headers to the transactions.csv
-	transactions = append(transactions, []string{"txSig", "blockHash", "blockTime", "txSlot", "recentBlockHash", "txFee"})
+	txTable := [][]string{}
+	txTable = append(txTable, TRANSACTIONS_HEADER)
+	// Per each splot's block, get the transactions
 	for currSlotNum := startSlot; currSlotNum < endSlot; currSlotNum++ {
 		block, err := rpcMethods.GetBlock(currSlotNum, nodeApi)
 		helpers.CheckErr(err)
@@ -35,24 +68,26 @@ func CollectTransactionsToCSV(startSlot int, endSlot int, nodeApi string) {
 			continue
 		}
 
-		// blockHash := block.Result.Blockhash
-		tx := block.Result.Transactions
 		// get the transaction details for each transaction in the block and write to CSV
-		if len(tx) > 0 {
-			// @todo i < len(tx) testing with 2 transactions
-			for i := 0; i < 2 && i < len(tx); i++ {
-				txSig := tx[i].Transaction.Signatures[0]
-				// fmt.Println("txSig: ", txSig)
-				txDetails, _ := rpcMethods.GetTransactionBySignature(txSig, nodeApi)
+		transactions := block.Result.Transactions
+		// txs2Get := 10
+		for i := 0; i < len(transactions); i++ {
+			// each transaction may have multiple signatures (?)
+			for _, txSig := range transactions[i].Transaction.Signatures {
+				txDetails, err := rpcMethods.GetTransactionBySignature(txSig, nodeApi)
+				helpers.CheckErr(err)
 				bts, _ := json.MarshalIndent(txDetails, "", "  ")
 				fmt.Println(string(bts))
-				// row := transactionAsCsvRow(txSig, blockHash, &txDetails)
-				// transactions = append(transactions, row)
-				time.Sleep(1000 * time.Millisecond) // to avoid overloading the node
+				if txDetails.Result.BlockTime == 0 {
+					fmt.Printf("txDetails blockTime is nil\n")
+					continue
+				}
+
+				row := transactionAsCsvRow(block, txSig, txDetails)
+				txTable = append(txTable, row)
+				time.Sleep(100 * time.Millisecond) // to avoid overloading the node
 			}
 		}
-		// sleep for 0.1 second to avoid overloading the node
-		time.Sleep(100 * time.Millisecond)
 	}
-	// helpers.ToCSV("transactions.csv", transactions)
+	helpers.ToCSV("data/transactions.csv", txTable)
 }
