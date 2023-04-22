@@ -1,17 +1,3 @@
-Initial Plan: 
----
-1. Get the latest Epoch
-2. Get All the blocks in the latest Epoch
-3. Get all the transactions in a single Block
-   1. Get input and output of transactions (functions invoked?)
-   2. Smart Contracts they interacted with
-4. Find unique addresses?
-5. 
-
-Notes:
-
-- First block in an Epoch does not have transactions
-
 Block Table
 ---
 BlockHeight/Number | MinedTimeStamp | BlockHash | PreviousBlockhash | TransactionCount | Epoch(?) | BlockMiner/Validator(?)
